@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: 'postgres:latest'
+    restart: always
+    environment:
+      - 'POSTGRES_DB=locamais'
+      - 'POSTGRES_PASSWORD=password'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_locamais:/var/lib/postgresql/locamais  # Volume para persistência dos dados
+
+volumes:
+  postgres_locamais:  # Define o volume para armazenar os dados do banco
