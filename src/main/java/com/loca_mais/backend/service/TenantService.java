@@ -16,7 +16,7 @@ public class TenantService {
     private final TenantDAO tenantDAO;
     private final UserDAO userDAO;
 
-    public void createTenant(UserCreateDTO user) {
+    public Integer createTenant(UserCreateDTO user) {
         UserEntity userEntity = new UserEntity(
                 user.name(),
                 user.lastName(),
@@ -26,7 +26,7 @@ public class TenantService {
                 user.password()
         );
         int userId=userDAO.save(userEntity);
-        tenantDAO.save(new TenantEntity(userId));
+        return tenantDAO.save(new TenantEntity(userId));
     }
 
     public UserDTO getTenant(Integer id) {
