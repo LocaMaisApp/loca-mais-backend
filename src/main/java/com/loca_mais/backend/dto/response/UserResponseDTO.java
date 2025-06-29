@@ -1,8 +1,10 @@
-package com.loca_mais.backend.dto;
+package com.loca_mais.backend.dto.response;
+
+import com.loca_mais.backend.enums.UserType;
 
 import java.util.Date;
 
-public record UserDTO(
+public record UserResponseDTO(
         int id,
         String name,
         String lastName,
@@ -11,6 +13,7 @@ public record UserDTO(
         String email,
         Date createdAt,
         Date updatedAt,
-        boolean active
+        boolean active,
+        UserType type
 ) {
 }

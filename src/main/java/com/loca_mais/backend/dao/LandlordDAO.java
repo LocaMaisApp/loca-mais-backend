@@ -27,25 +27,25 @@ public class LandlordDAO {
 
 
     public int save(LandlordEntity landlord) {
-        String sql = "INSERT INTO landlord (User_id) VALUES (?)";
+        String sql = "INSERT INTO landlords (User_id) VALUES (?)";
         return jdbcTemplate.update(sql, landlord.getUserId());
     }
 
 
     public LandlordEntity findByUserId(int userId) {
-        String sql = "SELECT User_id FROM landlord WHERE User_id = ?";
+        String sql = "SELECT User_id FROM landlords WHERE User_id = ?";
         return jdbcTemplate.queryForObject(sql, landlordRowMapper, userId);
     }
 
 
     public List<LandlordEntity> findAll() {
-        String sql = "SELECT User_id FROM landlord";
+        String sql = "SELECT User_id FROM landlords";
         return jdbcTemplate.query(sql, landlordRowMapper);
     }
 
 
     public int delete(int userId) {
-        String sql = "DELETE FROM landlord WHERE User_id = ?";
+        String sql = "DELETE FROM landlords WHERE User_id = ?";
         return jdbcTemplate.update(sql, userId);
     }
 }
