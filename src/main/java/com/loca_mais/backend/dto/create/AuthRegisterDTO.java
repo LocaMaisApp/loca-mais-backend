@@ -1,10 +1,13 @@
 package com.loca_mais.backend.dto.create;
 
-public record UserCreateDTO(
+import com.loca_mais.backend.enums.UserType;
+
+public record AuthRegisterDTO(
         String name,
         String lastName,
         String cpf,
         String phone,
         String email,
-        String password
+        String password,
+        UserType type
 ) {}

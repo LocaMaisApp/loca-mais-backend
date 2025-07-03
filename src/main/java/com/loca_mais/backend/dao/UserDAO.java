@@ -2,95 +2,200 @@ package com.loca_mais.backend.dao;
 
 import com.loca_mais.backend.model.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 public class UserDAO {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private RowMapper<UserEntity> userRowMapper = new RowMapper<UserEntity>() {
-        @Override
-        public UserEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
-            UserEntity user = new UserEntity();
-            user.setId(rs.getInt("id"));
-            user.setName(rs.getString("name"));
-            user.setLastName(rs.getString("last_name"));
-            user.setCpf(rs.getString("cpf"));
-            user.setPhone(rs.getString("phone"));
-            user.setEmail(rs.getString("email"));
-            user.setPassword(rs.getString("password"));
-            user.setCreatedAt(rs.getTimestamp("created_at"));
-            user.setUpdatedAt(rs.getTimestamp("updated_at"));
-            user.setActive(rs.getBoolean("active"));
-            return user;
-        }
-    };
+    private DataSource dataSource;
 
     public int save(UserEntity user) {
         String sql = "INSERT INTO users (name, last_name, cpf, phone, email, password, created_at, updated_at, active) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING ID";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            stmt.setString(1, user.getName());
+            stmt.setString(2, user.getLastName());
+            stmt.setString(3, user.getCpf());
+            stmt.setString(4, user.getPhone());
+            stmt.setString(5, user.getEmail());
+            stmt.setString(6, user.getPassword());
+            stmt.setTimestamp(7, new Timestamp(user.getCreatedAt().getTime()));
+            stmt.setTimestamp(8, new Timestamp(user.getUpdatedAt().getTime()));
+            stmt.setBoolean(9, user.isActive());
 
-        Integer id = jdbcTemplate.queryForObject(sql,
-                Integer.class,
-                user.getName(),
-                user.getLastName(),
-                user.getCpf(),
-                user.getPhone(),
-                user.getEmail(),
-                user.getPassword(),
-                new java.sql.Timestamp(user.getCreatedAt().getTime()),
-                new java.sql.Timestamp(user.getUpdatedAt().getTime()),
-                user.isActive()
-        );
+            stmt.executeUpdate();
 
-        if (id == null) {
-            throw new RuntimeException("Erro ao inserir usuário: id retornado é null");
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    throw new RuntimeException("Falha ao obter ID gerado.");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar usuário", e);
         }
-
-        return id;
     }
 
-    public UserEntity findById(int id) {
+    public Optional<UserEntity> findById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, userRowMapper, id);
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUser(rs));
+                }
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar usuário por ID", e);
+        }
     }
 
+    public Optional<UserEntity> findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUser(rs));
+                }
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar usuário por email", e);
+        }
+    }
+
+    public Optional<UserEntity> findByEmailOrCpf(String email, String cpf) {
+        String sql = "SELECT * FROM users WHERE email = ? OR cpf = ?";
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setString(1, email);
+            stmt.setString(2, cpf);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUser(rs));
+                }
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar por email ou CPF", e);
+        }
+    }
 
     public List<UserEntity> findAll() {
         String sql = "SELECT * FROM users";
-        return jdbcTemplate.query(sql, userRowMapper);
+        List<UserEntity> users = new ArrayList<>();
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()
+        ) {
+            while (rs.next()) {
+                users.add(mapResultSetToUser(rs));
+            }
+            return users;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar todos os usuários", e);
+        }
     }
-
 
     public int update(UserEntity user) {
         String sql = "UPDATE users SET name = ?, last_name = ?, cpf = ?, phone = ?, email = ?, password = ?, updated_at = ?, active = ? WHERE id = ?";
-        return jdbcTemplate.update(sql,
-                user.getName(),
-                user.getLastName(),
-                user.getCpf(),
-                user.getPhone(),
-                user.getEmail(),
-                user.getPassword(),
-                new java.sql.Timestamp(user.getUpdatedAt().getTime()),
-                user.isActive(),
-                user.getId());
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setString(1, user.getName());
+            stmt.setString(2, user.getLastName());
+            stmt.setString(3, user.getCpf());
+            stmt.setString(4, user.getPhone());
+            stmt.setString(5, user.getEmail());
+            stmt.setString(6, user.getPassword());
+            stmt.setTimestamp(7, new Timestamp(user.getUpdatedAt().getTime()));
+            stmt.setBoolean(8, user.isActive());
+            stmt.setInt(9, user.getId());
+
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar usuário", e);
+        }
     }
 
     public int delete(int id) {
         String sql = "DELETE FROM users WHERE id = ?";
-        return jdbcTemplate.update(sql, id);
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao deletar usuário", e);
+        }
+    }
+
+    public boolean isTenant(int userId) {
+        String sql = "SELECT COUNT(*) FROM tenants WHERE user_id = ?";
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar se é inquilino", e);
+        }
+    }
+
+    public boolean isLandlord(int userId) {
+        String sql = "SELECT COUNT(*) FROM landlords WHERE user_id = ?";
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar se é locador", e);
+        }
+    }
+
+    private UserEntity mapResultSetToUser(ResultSet rs) throws SQLException {
+        UserEntity user = new UserEntity();
+        user.setId(rs.getInt("id"));
+        user.setName(rs.getString("name"));
+        user.setLastName(rs.getString("last_name"));
+        user.setCpf(rs.getString("cpf"));
+        user.setPhone(rs.getString("phone"));
+        user.setEmail(rs.getString("email"));
+        user.setPassword(rs.getString("password"));
+        user.setCreatedAt(rs.getTimestamp("created_at"));
+        user.setUpdatedAt(rs.getTimestamp("updated_at"));
+        user.setActive(rs.getBoolean("active"));
+        return user;
     }
 }

@@ -1,6 +1,7 @@
 package com.loca_mais.backend.dto.response;
 
 import com.loca_mais.backend.enums.UserType;
+import lombok.Setter;
 
 import java.util.Date;
 
