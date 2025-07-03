@@ -22,7 +22,7 @@ public class AuthConfig {
     @Bean
     UserDetailsService userDetailsService() {
         return username -> {
-         Optional<UserEntity>user= userDAO.findByEmailOrCpf(username,null);
+         Optional<UserEntity>user= userDAO.findByEmail(username);
          if(user.isPresent()){
              return user.get();
          }
