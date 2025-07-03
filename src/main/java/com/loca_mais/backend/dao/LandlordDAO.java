@@ -16,36 +16,34 @@ public class LandlordDAO {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private RowMapper<LandlordEntity> landlordRowMapper = new RowMapper<LandlordEntity>() {
-        @Override
-        public LandlordEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
-            LandlordEntity landlord = new LandlordEntity();
-            landlord.setUserId(rs.getInt("User_id"));
-            return landlord;
-        }
-    };
+    private RowMapper<LandlordEntity> landlordRowMapper =
+            (rs, rowNum) -> {
+                LandlordEntity landlord = new LandlordEntity();
+                landlord.setUserId(rs.getInt("User_id"));
+                return landlord;
+            };
 
 
     public int save(LandlordEntity landlord) {
-        String sql = "INSERT INTO landlords (User_id) VALUES (?)";
+        String sql = "INSERT INTO landlords (user_id) VALUES (?)";
         return jdbcTemplate.update(sql, landlord.getUserId());
     }
 
 
     public LandlordEntity findByUserId(int userId) {
-        String sql = "SELECT User_id FROM landlords WHERE User_id = ?";
+        String sql = "SELECT user_id FROM landlords WHERE user_id = ?";
         return jdbcTemplate.queryForObject(sql, landlordRowMapper, userId);
     }
 
 
     public List<LandlordEntity> findAll() {
-        String sql = "SELECT User_id FROM landlords";
+        String sql = "SELECT user_id FROM landlords";
         return jdbcTemplate.query(sql, landlordRowMapper);
     }
 
 
     public int delete(int userId) {
-        String sql = "DELETE FROM landlords WHERE User_id = ?";
+        String sql = "DELETE FROM landlords WHERE user_id = ?";
         return jdbcTemplate.update(sql, userId);
     }
 }

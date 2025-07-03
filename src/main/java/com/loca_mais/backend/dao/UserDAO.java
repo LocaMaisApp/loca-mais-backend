@@ -2,6 +2,7 @@ package com.loca_mais.backend.dao;
 
 import com.loca_mais.backend.model.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,9 +12,8 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 public class UserDAO {
@@ -63,15 +63,41 @@ public class UserDAO {
         return id;
     }
 
-    public UserEntity findById(int id) {
+    public Optional<UserEntity> findById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, userRowMapper, id);
+        try {
+            UserEntity user = jdbcTemplate.queryForObject(sql, userRowMapper, id);
+            return Optional.of(user);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
+    public Optional<UserEntity> findByEmailOrCpf(String email,String cpf) {
+        String sql = "SELECT * FROM users WHERE email = ? OR cpf=?";
+        try {
+            UserEntity user = jdbcTemplate.queryForObject(sql, userRowMapper, email,cpf);
+            return Optional.of(user);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 
     public List<UserEntity> findAll() {
         String sql = "SELECT * FROM users";
         return jdbcTemplate.query(sql, userRowMapper);
+    }
+
+    public boolean isTenant(int userId) {
+        String sql = "SELECT COUNT(*) FROM tenants WHERE user_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId);
+        return count != null && count > 0;
+    }
+
+    public boolean isLandlord(int userId) {
+        String sql = "SELECT COUNT(*) FROM landlords WHERE user_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId);
+        return count != null && count > 0;
     }
 
 
