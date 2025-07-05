@@ -15,7 +15,7 @@ public class LandlordController {
 
     @GetMapping
     public ResponseEntity<UserResponseDTO> getLandlordById(@RequestParam int id) {
-        UserResponseDTO userDTO = landlordService.getLandlord(id);
+        UserResponseDTO userDTO = landlordService.findById(id);
         if (userDTO == null) {
             return ResponseEntity.notFound().build();
         }

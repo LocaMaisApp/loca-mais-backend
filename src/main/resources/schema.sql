@@ -38,14 +38,14 @@ CREATE TABLE IF NOT EXISTS landlords (
     );
 
 CREATE TABLE IF NOT EXISTS properties (
-                                          id SERIAL PRIMARY KEY,
-                                          created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                                          updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                                          active BOOLEAN NOT NULL DEFAULT TRUE,
-                                          name VARCHAR(255),
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    name VARCHAR(255),
     street VARCHAR(255),
     size INT,
-    bathrooms_quantity INT,
+    bathroom_quantity INT,
     state VARCHAR(45),
     suites INT,
     car_space INT,
@@ -53,13 +53,22 @@ CREATE TABLE IF NOT EXISTS properties (
     number INT,
     room_quantity INT,
     city VARCHAR(45),
-    landlord_user_id INT NOT NULL,
+    landlord_id INT NOT NULL,
     CONSTRAINT fk_property_landlord1
-    FOREIGN KEY (landlord_user_id)
+    FOREIGN KEY (landlord_id)
     REFERENCES landlords (user_id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_house_address
+    ON properties (street, number, city, state)
+    WHERE complement IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_condo_address
+    ON properties (street, number, city, state, complement)
+    WHERE complement IS NOT NULL;
+
 
 CREATE TABLE IF NOT EXISTS advertisements (
                                               id SERIAL PRIMARY KEY,
@@ -108,14 +117,14 @@ CREATE TABLE IF NOT EXISTS tickets (
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     property_id INT NOT NULL,
-    tenant_user_id INT NOT NULL,
+    tenant_id INT NOT NULL,
     CONSTRAINT fk_ticket_property1
     FOREIGN KEY (property_id)
     REFERENCES properties (id)
                          ON DELETE NO ACTION
                          ON UPDATE NO ACTION,
     CONSTRAINT fk_ticket_tenant1
-    FOREIGN KEY (tenant_user_id)
+    FOREIGN KEY (tenant_id)
     REFERENCES tenants (user_id)
                          ON DELETE NO ACTION
                          ON UPDATE NO ACTION
@@ -144,14 +153,14 @@ CREATE TABLE IF NOT EXISTS contracts (
     duration INT,
     deposit NUMERIC(10, 2),
     property_id INT NOT NULL,
-    tenant_user_id INT NOT NULL,
+    tenant_id INT NOT NULL,
     CONSTRAINT fk_contract_property1
     FOREIGN KEY (property_id)
     REFERENCES properties (id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
     CONSTRAINT fk_contract_tenant1
-    FOREIGN KEY (tenant_user_id)
+    FOREIGN KEY (tenant_id)
     REFERENCES tenants (user_id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION

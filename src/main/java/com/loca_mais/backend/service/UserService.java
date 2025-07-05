@@ -7,7 +7,10 @@ import com.loca_mais.backend.enums.UserType;
 import com.loca_mais.backend.mappers.UserMapper;
 import com.loca_mais.backend.model.UserEntity;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -25,6 +28,10 @@ public class UserService {
         UserType type=userDAO.isTenant(userEntity.getId())?UserType.TENANT:UserType.LANDLORD;
         UserResponseDTO response=userMapper.toUserResponseDTO(userEntity,type);
         return response;
+    }
+
+    public Optional<UserEntity> findById(int id){
+        return userDAO.findById(id);
     }
 
 

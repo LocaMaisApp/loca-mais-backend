@@ -32,7 +32,7 @@ public class LandlordService {
         return landlordDAO.save(new LandlordEntity(userId));
     }
 
-    public UserResponseDTO getLandlord(Integer id) {
+    public UserResponseDTO findById(Integer id) {
         Optional<UserEntity> optionalUser= userDAO.findById(id);
         if(optionalUser.isEmpty()){
             throw new RuntimeException("User not found");
