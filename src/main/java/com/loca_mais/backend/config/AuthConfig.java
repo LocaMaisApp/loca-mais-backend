@@ -1,7 +1,9 @@
 package com.loca_mais.backend.config;
 
 import com.loca_mais.backend.dao.UserDAO;
+import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
 import com.loca_mais.backend.model.UserEntity;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,23 +12,25 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
 @Configuration
+@AllArgsConstructor
 public class AuthConfig {
-    @Autowired
-    private UserDAO userDAO;
+
+    private final UserDAO userDAO;
 
     @Bean
     UserDetailsService userDetailsService() {
         return username -> {
          Optional<UserEntity>user= userDAO.findByEmail(username);
-         if(user.isPresent()){
-             return user.get();
+         if(user.isEmpty()){
+             throw new UsernameNotFoundException("Conta não cadastrada");
          }
-         return null;
+            return user.get();
         };
     }
 

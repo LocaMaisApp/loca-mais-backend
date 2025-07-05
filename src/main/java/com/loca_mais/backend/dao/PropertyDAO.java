@@ -1,8 +1,11 @@
 package com.loca_mais.backend.dao;
 
+import com.loca_mais.backend.exceptions.custom.core.ResourceNotFoundException;
+import com.loca_mais.backend.exceptions.util.PostgresError;
 import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.model.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -39,21 +42,26 @@ public class PropertyDAO {
                 return stmt.executeUpdate();
 
             } catch (SQLException e) {
+                if (PostgresError.isDuplicateKeyError(e)) {
+                    throw new DuplicateKeyException("Propriedade duplicada");
+                }
                 throw new RuntimeException("Erro ao salvar propriedade: " + e.getMessage(), e);
             }
         }
 
-    public int delete(int id) {
+    public void delete(int id) {
         String sql = "DELETE FROM properties WHERE id = ?";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setInt(1, id);
-            return stmt.executeUpdate();
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new ResourceNotFoundException("Propriedade não encontrada para o id: " + id);
+            }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting property: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao apagar propriedade");
         }
     }
 
@@ -72,7 +80,7 @@ public class PropertyDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar todas as propriedades: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao buscar todas as propriedades");
         }
         return properties;
     }

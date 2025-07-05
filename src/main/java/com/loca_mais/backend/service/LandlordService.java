@@ -5,6 +5,7 @@ import com.loca_mais.backend.dao.UserDAO;
 import com.loca_mais.backend.dto.create.AuthRegisterDTO;
 import com.loca_mais.backend.dto.response.UserResponseDTO;
 import com.loca_mais.backend.enums.UserType;
+import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
 import com.loca_mais.backend.model.LandlordEntity;
 import com.loca_mais.backend.model.UserEntity;
 import lombok.AllArgsConstructor;
@@ -33,9 +34,9 @@ public class LandlordService {
     }
 
     public UserResponseDTO findById(Integer id) {
-        Optional<UserEntity> optionalUser= userDAO.findById(id);
+        Optional<UserEntity> optionalUser= landlordDAO.findByUserId(id);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("User not found");
+            throw new EntityNotFoundException("Proprietário não encontrado");
         }
         UserEntity user=optionalUser.get();
 

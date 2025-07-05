@@ -15,11 +15,8 @@ public class TenantController {
 
 
     @GetMapping
-    public ResponseEntity<UserResponseDTO> getTenantById(@RequestParam int id) {
-        UserResponseDTO userDTO = tenantService.getTenant(id);
-        if (userDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<UserResponseDTO> findTenantById(@RequestParam int id) {
+        UserResponseDTO userDTO = tenantService.findById(id);
         return ResponseEntity.ok(userDTO);
     }
 

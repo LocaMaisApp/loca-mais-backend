@@ -1,7 +1,10 @@
 package com.loca_mais.backend.dao;
 
+import com.loca_mais.backend.exceptions.util.PostgresError;
 import com.loca_mais.backend.model.LandlordEntity;
+import com.loca_mais.backend.model.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -25,12 +28,18 @@ public class LandlordDAO {
             stmt.setInt(1, landlord.getUserId());
             return stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar landlord", e);
+            if (PostgresError.isDuplicateKeyError(e)) {
+                throw new DuplicateKeyException("Proprietário duplicado");
+            }
+            throw new RuntimeException("Erro ao salvar proprietário: " + e.getMessage(), e);
         }
     }
 
-    public Optional<LandlordEntity> findByUserId(int userId) {
-        String sql = "SELECT user_id FROM landlords WHERE user_id = ?";
+    public Optional<UserEntity> findByUserId(int userId) {
+        String sql = "SELECT u.* " +
+                "FROM users u " +
+                "JOIN landlords l ON l.user_id = u.id " +
+                "WHERE l.user_id = ?;";
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement stmt = connection.prepareStatement(sql)
@@ -38,9 +47,7 @@ public class LandlordDAO {
             stmt.setInt(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    LandlordEntity landlord = new LandlordEntity();
-                    landlord.setUserId(rs.getInt("user_id"));
-                    return Optional.of(landlord);
+                    return Optional.of(mapResultSetToUser(rs));
                 }
                 return Optional.empty();
             }
@@ -68,4 +75,19 @@ public class LandlordDAO {
         }
     }
 
+
+    private UserEntity mapResultSetToUser(ResultSet rs) throws SQLException {
+        UserEntity user = new UserEntity();
+        user.setId(rs.getInt("id"));
+        user.setName(rs.getString("name"));
+        user.setLastName(rs.getString("last_name"));
+        user.setCpf(rs.getString("cpf"));
+        user.setPhone(rs.getString("phone"));
+        user.setEmail(rs.getString("email"));
+        user.setPassword(rs.getString("password"));
+        user.setCreatedAt(rs.getTimestamp("created_at"));
+        user.setUpdatedAt(rs.getTimestamp("updated_at"));
+        user.setActive(rs.getBoolean("active"));
+        return user;
+    }
 };

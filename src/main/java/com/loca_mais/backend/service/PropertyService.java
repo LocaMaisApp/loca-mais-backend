@@ -25,13 +25,7 @@ public class PropertyService {
 
     public void create(PropertyRegistrationDTO propertyRegistrationDTO){
         PropertyEntity propertyEntity=propertyMapper.toEntity(propertyRegistrationDTO);
-        try{
-            landlordService.findById(propertyEntity.getLandlord_id());
-            propertyDAO.save(propertyEntity);
-        }
-        catch (Exception e){
-            System.out.println(e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        }
+        landlordService.findById(propertyEntity.getLandlord_id());
+        propertyDAO.save(propertyEntity);
     }
 }

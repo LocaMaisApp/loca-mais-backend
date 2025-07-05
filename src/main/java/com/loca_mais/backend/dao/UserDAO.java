@@ -1,7 +1,10 @@
 package com.loca_mais.backend.dao;
 
+import com.loca_mais.backend.exceptions.custom.core.ResourceNotFoundException;
+import com.loca_mais.backend.exceptions.util.PostgresError;
 import com.loca_mais.backend.model.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -43,8 +46,11 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar usuário", e);
+        if (PostgresError.isDuplicateKeyError(e)) {
+            throw new DuplicateKeyException("Usuário duplicado");
         }
+        throw new RuntimeException("Erro ao salvar usuário: " + e.getMessage(), e);
+    }
     }
 
     public Optional<UserEntity> findById(int id) {
@@ -137,18 +143,24 @@ public class UserDAO {
 
             return stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar usuário", e);
+            if (PostgresError.isDuplicateKeyError(e)) {
+                throw new DuplicateKeyException("Usuário duplicado");
+            }
+            throw new RuntimeException("Erro ao atualizar usuário: " + e.getMessage(), e);
         }
     }
 
-    public int delete(int id) {
+    public void delete(int id) {
         String sql = "DELETE FROM users WHERE id = ?";
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement stmt = connection.prepareStatement(sql)
         ) {
             stmt.setInt(1, id);
-            return stmt.executeUpdate();
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new ResourceNotFoundException("Usuário não encontrado para o id: " + id);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao deletar usuário", e);
         }
