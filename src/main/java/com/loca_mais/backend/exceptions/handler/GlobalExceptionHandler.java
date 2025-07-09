@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.sql.SQLException;
+
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -27,6 +29,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DuplicateKeyException.class)
     public ResponseEntity<Object> handleDuplicateKeyException(DuplicateKeyException ex) {
         ApiException apiException = new ApiException(HttpStatus.CONFLICT, ex.getMessage());
+        return ApiException.toResponseEntity(apiException);
+    }
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<Object> handleSQLException(SQLException ex) {
+        ApiException apiException = new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         return ApiException.toResponseEntity(apiException);
     }
 

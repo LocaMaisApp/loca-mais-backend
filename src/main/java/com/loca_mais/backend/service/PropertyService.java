@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -27,5 +28,9 @@ public class PropertyService {
         PropertyEntity propertyEntity=propertyMapper.toEntity(propertyRegistrationDTO);
         landlordService.findById(propertyEntity.getLandlord_id());
         propertyDAO.save(propertyEntity);
+    }
+
+    public Optional<PropertyEntity> findById(Integer id){
+        return propertyDAO.findById(id);
     }
 }

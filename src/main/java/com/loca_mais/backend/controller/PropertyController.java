@@ -30,8 +30,4 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-
-
-
-
 }
