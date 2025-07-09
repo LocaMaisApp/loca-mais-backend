@@ -2,22 +2,10 @@ CREATE SCHEMA IF NOT EXISTS locamais;
 
 SET search_path TO locamais;
 
-DROP TABLE IF EXISTS payments CASCADE;
-DROP TABLE IF EXISTS contracts CASCADE;
-DROP TABLE IF EXISTS maintenances CASCADE;
-DROP TABLE IF EXISTS tickets CASCADE;
-DROP TABLE IF EXISTS advertisement_images CASCADE;
-DROP TABLE IF EXISTS advertisements CASCADE;
-DROP TABLE IF EXISTS properties CASCADE;
-DROP TABLE IF EXISTS landlords CASCADE;
-DROP TABLE IF EXISTS tenants CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
-DROP TYPE IF EXISTS ticket_status_enum CASCADE;
 CREATE TYPE ticket_status_enum AS ENUM ('FINISHED', 'PROGRESS', 'PENDENT');
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(45) NOT NULL,
+                                     id SERIAL PRIMARY KEY,
+                                     name VARCHAR(45) NOT NULL,
     last_name VARCHAR(45) NOT NULL,
     cpf VARCHAR(45) UNIQUE NOT NULL,
     phone VARCHAR(45),
@@ -38,11 +26,11 @@ CREATE TABLE IF NOT EXISTS landlords (
     );
 
 CREATE TABLE IF NOT EXISTS properties (
-    id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    name VARCHAR(255),
+                                          id SERIAL PRIMARY KEY,
+                                          created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                                          updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                                          active BOOLEAN NOT NULL DEFAULT TRUE,
+                                          name VARCHAR(255),
     street VARCHAR(255),
     size INT,
     bathroom_quantity INT,
@@ -89,7 +77,7 @@ CREATE TABLE IF NOT EXISTS advertisements (
     );
 
 CREATE TABLE IF NOT EXISTS advertisement_images (
-    url VARCHAR(255) NOT NULL,
+                                                    url VARCHAR(255) NOT NULL,
     advertisement_id INT NOT NULL,
     PRIMARY KEY (advertisement_id, url),
     CONSTRAINT fk_advertisement_images_advertisement
