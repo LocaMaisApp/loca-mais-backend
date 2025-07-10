@@ -46,7 +46,7 @@ public class AdvertisementDAO {
             return affectedRows;
         } catch (SQLException e) {
             if (PostgresError.isDuplicateKeyError(e)) {
-                throw new DuplicateKeyException("Anúncio duplicado ou propriedade já associada a um anúncio.");
+                throw new DuplicateKeyException("Propriedade já associada a um anúncio.");
             }
             throw new RuntimeException("Erro ao salvar anúncio: " + e.getMessage(), e);
         }

@@ -1,6 +1,5 @@
 package com.loca_mais.backend.controller;
 
-import com.loca_mais.backend.dao.PropertyDAO;
 import com.loca_mais.backend.dto.create.PropertyRegistrationDTO;
 import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.service.PropertyService;
@@ -25,9 +24,9 @@ public class PropertyController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody PropertyRegistrationDTO registrationDTO){
-        propertyService.create(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<PropertyEntity> create(@RequestBody PropertyRegistrationDTO registrationDTO){
+       PropertyEntity property=propertyService.create(registrationDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(property);
     }
 
 }

@@ -1,16 +1,19 @@
 package com.loca_mais.backend.service;
 
 import com.loca_mais.backend.dao.LandlordDAO;
+import com.loca_mais.backend.dao.PropertyDAO;
 import com.loca_mais.backend.dao.UserDAO;
 import com.loca_mais.backend.dto.create.AuthRegisterDTO;
 import com.loca_mais.backend.dto.response.UserResponseDTO;
 import com.loca_mais.backend.enums.UserType;
 import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
 import com.loca_mais.backend.model.LandlordEntity;
+import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.model.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,8 +22,9 @@ public class LandlordService {
 
     private final LandlordDAO landlordDAO;
     private final UserDAO userDAO;
+    private final PropertyDAO  propertyDAO;
 
-    public Integer createLandlord(AuthRegisterDTO user,String encodedPassword) {
+    public void createLandlord(AuthRegisterDTO user,String encodedPassword) {
         UserEntity userEntity = new UserEntity(
                 user.name(),
                 user.lastName(),
@@ -30,7 +34,7 @@ public class LandlordService {
                 encodedPassword
         );
         int userId=userDAO.save(userEntity);
-        return landlordDAO.save(new LandlordEntity(userId));
+        landlordDAO.save(new LandlordEntity(userId));
     }
 
     public UserResponseDTO findById(Integer id) {
@@ -45,6 +49,11 @@ public class LandlordService {
                 user.getCreatedAt(),user.getUpdatedAt(),user.isActive(), UserType.LANDLORD);
     }
 
+
+    public List<PropertyEntity> findAllLandlordProperties(Integer landlordId) {
+        return propertyDAO.findAllByLandlordId(landlordId);
+
+    }
 
 
 }

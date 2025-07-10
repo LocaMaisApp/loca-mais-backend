@@ -1,13 +1,16 @@
 package com.loca_mais.backend.controller;
 
 import com.loca_mais.backend.dto.response.UserResponseDTO;
+import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.service.LandlordService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/landlord")
+@RequestMapping("/api/landlords")
 @AllArgsConstructor
 public class LandlordController {
 
@@ -21,5 +24,13 @@ public class LandlordController {
         }
         return ResponseEntity.ok(userDTO);
     }
+
+    @GetMapping("/{id}/properties")
+    public ResponseEntity<List<PropertyEntity>> getLandlordPropertiesById(@PathVariable int id) {
+        UserResponseDTO userDTO = landlordService.findById(id);
+        List<PropertyEntity> properties=landlordService.findAllLandlordProperties(userDTO.id());
+        return ResponseEntity.ok(properties);
+    }
+
 
 }

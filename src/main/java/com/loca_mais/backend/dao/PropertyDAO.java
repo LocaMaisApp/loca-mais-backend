@@ -24,7 +24,7 @@ public class PropertyDAO {
             String sql = "INSERT INTO properties (name, street, city, state, complement, number, size, bathroom_quantity, suites, car_space, room_quantity, landlord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try (Connection connection = dataSource.getConnection();
-                 PreparedStatement stmt = connection.prepareStatement(sql)) {
+                 PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
                 stmt.setString(1, property.getName());
                 stmt.setString(2, property.getStreet());
@@ -39,8 +39,20 @@ public class PropertyDAO {
                 stmt.setInt(11, property.getRoomQuantity());
                 stmt.setInt(12, property.getLandlord_id());
 
-                return stmt.executeUpdate();
 
+                int affectedRows = stmt.executeUpdate();
+
+                if (affectedRows == 0) {
+                    throw new SQLException("Falha ao inserir propriedade, nenhuma linha afetada.");
+                }
+
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        return generatedKeys.getInt(1);
+                    } else {
+                        throw new SQLException("Falha ao obter o ID gerado da propriedade.");
+                    }
+                }
             } catch (SQLException e) {
                 if (PostgresError.isDuplicateKeyError(e)) {
                     throw new DuplicateKeyException("Propriedade duplicada");
@@ -103,6 +115,30 @@ public class PropertyDAO {
             throw new RuntimeException("Erro ao buscar propriedade por ID", e);
         }
     }
+
+
+    public List<PropertyEntity> findAllByLandlordId(int landlordId) {
+        String sql = "SELECT * FROM properties WHERE landlord_id = ?";
+
+        List<PropertyEntity> properties = new ArrayList<>();
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+
+        ) {
+            stmt.setInt(1, landlordId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    properties.add(mapResultSetToProperty(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar todas as propriedades do proprietário com id: "+ landlordId);
+        }
+        return properties;
+    }
+
 
 
     private PropertyEntity mapResultSetToProperty(ResultSet rs) throws SQLException {
