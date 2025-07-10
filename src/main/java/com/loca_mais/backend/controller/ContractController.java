@@ -19,7 +19,12 @@ public class ContractController {
 
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody CreateContractDTO createContractDTO) {
-
+        try {
+            Object result = this.contractService.execute(createContractDTO);
+            return ResponseEntity.ok().body(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e);
+        }
     }
 
 }

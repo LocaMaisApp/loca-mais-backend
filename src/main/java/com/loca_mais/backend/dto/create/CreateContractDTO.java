@@ -1,9 +1,8 @@
 package com.loca_mais.backend.dto.create;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
+
+import java.math.BigDecimal;
 
 public record CreateContractDTO(
         @Min(1)
@@ -11,18 +10,18 @@ public record CreateContractDTO(
         int payment_day,
 
         @Positive
-        float monthly_value,
+        BigDecimal monthly_value,
 
         @Min(1)
         int duration,
 
         @Positive
-        float deposit,
+        BigDecimal deposit,
 
         @NotNull
         int property_id,
 
-        @NotNull
-        int Tenant_User_id
+        @NotBlank
+        String Tenant_User_email
 ) {
 }

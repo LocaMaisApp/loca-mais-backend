@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,11 +16,9 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class ContractEntity extends AbstractModel {
     private int payment_day;
-    //Mudar depois o tipo float, vamos ver qual estratégia iremos utilizar
-    private float monthly_value;
+    private BigDecimal monthly_value;
     private int duration;
-    //Mudar depois o tipo float, vamos ver qual estratégia iremos utilizar
-    private float deposit;
+    private BigDecimal deposit;
     private int property_id;
-    private int Tenant_User_id;
+    private int tenant_id;
 }
