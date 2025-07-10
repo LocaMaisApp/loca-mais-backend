@@ -22,6 +22,7 @@ public record CreateContractDTO(
         int property_id,
 
         @NotBlank
-        String Tenant_User_email
+        @Email
+        String tenantEmail
 ) {
 }

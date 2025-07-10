@@ -1,6 +1,7 @@
 package com.loca_mais.backend.controller;
 
 import com.loca_mais.backend.dto.create.CreateContractDTO;
+import com.loca_mais.backend.dto.response.CreateContractResponseDTO;
 import com.loca_mais.backend.service.ContractService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,10 +21,10 @@ public class ContractController {
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody CreateContractDTO createContractDTO) {
         try {
-            Object result = this.contractService.execute(createContractDTO);
+            CreateContractResponseDTO result = this.contractService.execute(createContractDTO);
             return ResponseEntity.ok().body(result);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

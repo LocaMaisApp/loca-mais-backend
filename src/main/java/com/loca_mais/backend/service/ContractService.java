@@ -4,7 +4,9 @@ import com.loca_mais.backend.dao.ContractDAO;
 import com.loca_mais.backend.dao.PropertyDAO;
 import com.loca_mais.backend.dao.UserDAO;
 import com.loca_mais.backend.dto.create.CreateContractDTO;
+import com.loca_mais.backend.dto.response.CreateContractResponseDTO;
 import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
+import com.loca_mais.backend.mappers.ContractMapper;
 import com.loca_mais.backend.model.ContractEntity;
 import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.model.UserEntity;
@@ -20,15 +22,16 @@ public class ContractService {
     private final ContractDAO contractDAO;
     private final UserDAO userDAO;
     private final PropertyDAO propertyDAO;
+    private final ContractMapper contractMapper;
 
-    public ContractEntity execute(CreateContractDTO createContractDTO) {
-        Optional<UserEntity> userOptional = userDAO.findByEmail(createContractDTO.Tenant_User_email());
+    public CreateContractResponseDTO execute(CreateContractDTO createContractDTO) {
+        Optional<UserEntity> tenantOptional = userDAO.findByEmail(createContractDTO.tenantEmail());
 
-        if(userOptional.isEmpty()) {
+        if(tenantOptional.isEmpty()) {
             throw new EntityNotFoundException("Inquilino não encontrado.");
         }
 
-        UserEntity tenant = userOptional.get();
+        UserEntity tenant = tenantOptional.get();
 
         Optional<PropertyEntity> propertyOptional = propertyDAO.findById(createContractDTO.property_id());
 
@@ -47,7 +50,9 @@ public class ContractService {
                 .tenant_id(tenant.getId())
                 .build();
 
-        return contractDAO.create(contractEntity);
+        ContractEntity createdContract = contractDAO.create(contractEntity);
+
+        return contractMapper.toCreateContractResponseDTO(createdContract);
     }
 
 }
