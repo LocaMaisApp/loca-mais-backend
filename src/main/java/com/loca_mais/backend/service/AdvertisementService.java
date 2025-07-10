@@ -45,6 +45,10 @@ public class AdvertisementService {
          return advertisementDAO.findAll();
     }
 
+    public List<AdvertisementResponse> findAllByQuery(String query){
+        return advertisementDAO.findAllByQuery(query);
+    }
+
 
 
     public void delete(Integer advertisementId){

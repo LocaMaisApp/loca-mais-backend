@@ -45,6 +45,13 @@ public class AdvertisementController {
         return ResponseEntity.status(HttpStatus.OK).body(advertisementResponse);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<AdvertisementResponse>> findAllByQuery(@RequestParam("query") String query){
+        List<AdvertisementResponse> advertisementResponses=advertisementService.findAllByQuery(query);
+        return  ResponseEntity.status(HttpStatus.OK).body(advertisementResponses);
+    }
+
+
 
 
 }

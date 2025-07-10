@@ -154,7 +154,6 @@ public class AdvertisementDAO {
 
                 if (rs.getString("img_url") != null) {
                     String imageUrl = rs.getString("img_url");
-                    // Adiciona apenas se a URL da imagem ainda não estiver na lista do DTO
                     if (!advertisementResponse.getImages().contains(imageUrl)) {
                         advertisementResponse.getImages().add(imageUrl);
                     }
@@ -163,6 +162,92 @@ public class AdvertisementDAO {
             return new ArrayList<>(advertisementResponseMap.values());
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar todos os anúncios com propriedades e imagens", e);
+        }
+    }
+
+
+
+    public List<AdvertisementResponse> findAllByQuery(String query) {
+        String[] terms = query.trim().split("\\s+");
+
+        StringBuilder sql = new StringBuilder("SELECT " +
+                "a.id AS ad_id, a.description AS ad_description, a.condominium_value AS ad_condominium_value, " +
+                "a.value AS ad_value, a.iptu_value AS ad_iptu_value, a.property_id AS ad_property_id, " +
+                "a.created_at AS ad_created_at, a.updated_at AS ad_updated_at, a.active AS ad_active, " +
+                "p.id AS prop_id, p.name AS prop_name, p.street AS prop_street, p.city AS prop_city, " +
+                "p.state AS prop_state, p.complement AS prop_complement, p.number AS prop_number, " +
+                "p.size AS prop_size, p.bathroom_quantity AS prop_bathroom_quantity, p.suites AS prop_suites, " +
+                "p.car_space AS prop_car_space, p.room_quantity AS prop_room_quantity, p.landlord_id AS prop_landlord_id, " +
+                "p.created_at AS prop_created_at, p.updated_at AS prop_updated_at, p.active AS prop_active, " +
+                "ai.url AS img_url, ai.advertisement_id AS img_advertisement_id " +
+                "FROM advertisements a " +
+                "JOIN properties p ON a.property_id = p.id " +
+                "LEFT JOIN advertisement_images ai ON a.id = ai.advertisement_id ");
+
+        if (terms.length > 0) {
+            sql.append("WHERE ");
+            for (int i = 0; i < terms.length; i++) {
+                if (i > 0) sql.append(" AND ");
+                sql.append("(")
+                        .append("a.description ILIKE ? OR ")
+                        .append("p.name ILIKE ? OR ")
+                        .append("p.city ILIKE ? OR ")
+                        .append("p.street ILIKE ?")
+                        .append(")");
+            }
+        }
+
+        sql.append(" ORDER BY a.id, ai.url");
+
+        Map<Integer, AdvertisementResponse> advertisementResponseMap = new HashMap<>();
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql.toString())
+        ) {
+            int paramIndex = 1;
+            for (String term : terms) {
+                String like = "%" + term + "%";
+                stmt.setString(paramIndex++, like);
+                stmt.setString(paramIndex++, like);
+                stmt.setString(paramIndex++, like);
+                stmt.setString(paramIndex++, like);
+
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int adId = rs.getInt("ad_id");
+                    AdvertisementResponse advertisementResponse = advertisementResponseMap.get(adId);
+
+                    if (advertisementResponse == null) {
+                        AdvertisementEntity tempAdvertisement = mapResultSetToAdvertisement(rs);
+                        PropertyEntity property = mapResultSetToProperty(rs);
+                        List<String> imageUrls = new ArrayList<>();
+
+                        advertisementResponse = new AdvertisementResponse(
+                                tempAdvertisement.getId(),
+                                tempAdvertisement.getDescription(),
+                                tempAdvertisement.getCondominiumValue(),
+                                tempAdvertisement.getValue(),
+                                tempAdvertisement.getIptuValue(),
+                                property,
+                                imageUrls
+                        );
+                        advertisementResponseMap.put(adId, advertisementResponse);
+                    }
+
+                    if (rs.getString("img_url") != null) {
+                        String imageUrl = rs.getString("img_url");
+                        if (!advertisementResponse.getImages().contains(imageUrl)) {
+                            advertisementResponse.getImages().add(imageUrl);
+                        }
+                    }
+                }
+                return new ArrayList<>(advertisementResponseMap.values());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar anúncios por termos", e);
         }
     }
 
@@ -235,10 +320,5 @@ public class AdvertisementDAO {
         return property;
     }
 
-    private AdvertisementImagesEntity mapResultSetToAdvertisementImage(ResultSet rs) throws SQLException {
-        AdvertisementImagesEntity advertisementImage = new AdvertisementImagesEntity();
-        advertisementImage.setUrl(rs.getString("img_url"));
-        advertisementImage.setAdvertisementId(rs.getObject("img_advertisement_id", Integer.class));
-        return advertisementImage;
-    }
+
 }
