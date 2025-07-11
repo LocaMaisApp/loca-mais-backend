@@ -11,6 +11,7 @@ import com.loca_mais.backend.model.ContractEntity;
 import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.model.UserEntity;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -59,14 +60,14 @@ public class ContractService {
         Optional<ContractEntity> optionalContractEntity = contractDAO.findById(id);
 
         if(optionalContractEntity.isEmpty()) {
-            throw new EntityNotFoundException("Contrato não encontrado");
+            throw new EntityNotFoundException("Contrato não encontrado", HttpStatus.NOT_FOUND);
         }
 
         return optionalContractEntity.get();
      }
 
      public void deleteById(int id) {
-        contractDAO.findById(id).orElseThrow(() -> new EntityNotFoundException("Contrato não encontrado"));
+        contractDAO.findById(id).orElseThrow(() -> new EntityNotFoundException("Contrato não encontrado", HttpStatus.NOT_FOUND));
 
         contractDAO.softDeleteById(id);
      }
