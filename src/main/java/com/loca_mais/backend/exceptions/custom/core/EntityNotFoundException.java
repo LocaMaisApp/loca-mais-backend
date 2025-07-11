@@ -7,4 +7,8 @@ public class EntityNotFoundException extends ApiException {
     public EntityNotFoundException(String message) {
         super(HttpStatus.BAD_REQUEST, message);
     }
+
+    public EntityNotFoundException(String message, HttpStatus status) {
+        super(status, message);
+    }
 }

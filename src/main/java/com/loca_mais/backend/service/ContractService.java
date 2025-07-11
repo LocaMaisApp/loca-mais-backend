@@ -5,12 +5,14 @@ import com.loca_mais.backend.dao.PropertyDAO;
 import com.loca_mais.backend.dao.UserDAO;
 import com.loca_mais.backend.dto.create.CreateContractDTO;
 import com.loca_mais.backend.dto.response.CreateContractResponseDTO;
+import com.loca_mais.backend.dto.response.GetContractResponseDTO;
 import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
 import com.loca_mais.backend.mappers.ContractMapper;
 import com.loca_mais.backend.model.ContractEntity;
 import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.model.UserEntity;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -24,7 +26,7 @@ public class ContractService {
     private final PropertyDAO propertyDAO;
     private final ContractMapper contractMapper;
 
-    public CreateContractResponseDTO execute(CreateContractDTO createContractDTO) {
+    public CreateContractResponseDTO create(CreateContractDTO createContractDTO) {
         Optional<UserEntity> tenantOptional = userDAO.findByEmail(createContractDTO.tenantEmail());
 
         if(tenantOptional.isEmpty()) {
@@ -54,5 +56,16 @@ public class ContractService {
 
         return contractMapper.toCreateContractResponseDTO(createdContract);
     }
+
+    public GetContractResponseDTO findById(int id) {
+        return contractDAO.findWithPropertyById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Contrato não encontrado", HttpStatus.NOT_FOUND));
+     }
+
+     public void deleteById(int id) {
+        contractDAO.findById(id).orElseThrow(() -> new EntityNotFoundException("Contrato não encontrado", HttpStatus.NOT_FOUND));
+
+        contractDAO.softDeleteById(id);
+     }
 
 }
