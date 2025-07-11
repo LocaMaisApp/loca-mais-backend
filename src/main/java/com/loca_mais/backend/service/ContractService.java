@@ -24,7 +24,7 @@ public class ContractService {
     private final PropertyDAO propertyDAO;
     private final ContractMapper contractMapper;
 
-    public CreateContractResponseDTO execute(CreateContractDTO createContractDTO) {
+    public CreateContractResponseDTO create(CreateContractDTO createContractDTO) {
         Optional<UserEntity> tenantOptional = userDAO.findByEmail(createContractDTO.tenantEmail());
 
         if(tenantOptional.isEmpty()) {
@@ -54,5 +54,21 @@ public class ContractService {
 
         return contractMapper.toCreateContractResponseDTO(createdContract);
     }
+
+    public ContractEntity findById(int id) {
+        Optional<ContractEntity> optionalContractEntity = contractDAO.findById(id);
+
+        if(optionalContractEntity.isEmpty()) {
+            throw new EntityNotFoundException("Contrato não encontrado");
+        }
+
+        return optionalContractEntity.get();
+     }
+
+     public void deleteById(int id) {
+        contractDAO.findById(id).orElseThrow(() -> new EntityNotFoundException("Contrato não encontrado"));
+
+        contractDAO.softDeleteById(id);
+     }
 
 }
