@@ -2,7 +2,7 @@ package com.loca_mais.backend.controller;
 
 import com.loca_mais.backend.dto.create.CreateContractDTO;
 import com.loca_mais.backend.dto.response.CreateContractResponseDTO;
-import com.loca_mais.backend.dto.response.GetContractResponseDTO;
+import com.loca_mais.backend.dto.response.ContractResponseDTO;
 import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
 import com.loca_mais.backend.service.ContractService;
 import jakarta.validation.Valid;
@@ -30,7 +30,7 @@ public class ContractController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getContractById(@PathVariable int id) {
         try {
-            GetContractResponseDTO result = contractService.findById(id);
+            ContractResponseDTO result = contractService.findById(id);
             return ResponseEntity.ok().body(result);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();

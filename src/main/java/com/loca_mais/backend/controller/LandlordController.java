@@ -1,6 +1,7 @@
 package com.loca_mais.backend.controller;
 
 import com.loca_mais.backend.dto.response.AdvertisementResponse;
+import com.loca_mais.backend.dto.response.ContractResponseDTO;
 import com.loca_mais.backend.dto.response.UserResponseDTO;
 import com.loca_mais.backend.model.PropertyEntity;
 import com.loca_mais.backend.service.LandlordService;
@@ -38,6 +39,14 @@ public class LandlordController {
         UserResponseDTO userDTO = landlordService.findById(id);
         List<AdvertisementResponse> advertisements=landlordService.findAllLandlordAdvertisements(userDTO.id());
         return ResponseEntity.ok(advertisements);
+    }
+
+
+    @GetMapping("/{id}/contracts")
+    public ResponseEntity<List<ContractResponseDTO>> getLandlordContractsById(@PathVariable int id) {
+        UserResponseDTO userDTO = landlordService.findById(id);
+        List<ContractResponseDTO> contracts=landlordService.findAllLandlordContracts(userDTO.id());
+        return ResponseEntity.ok(contracts);
     }
 
 

@@ -4,8 +4,9 @@ import com.loca_mais.backend.model.PropertyEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
-public record GetContractResponseDTO(
+public record ContractResponseDTO(
         int id,
         LocalDateTime created_at,
         LocalDateTime updated_at,
@@ -15,6 +16,7 @@ public record GetContractResponseDTO(
         BigDecimal deposit,
         int tenant_id,
         boolean active,
-        PropertyEntity propertyEntity
-) {
+        PropertyEntity propertyEntity,
+        List<PaymentResponseDTO> payments
+){
 }

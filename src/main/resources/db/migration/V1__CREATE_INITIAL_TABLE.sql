@@ -4,7 +4,7 @@ SET search_path TO locamais;
 
 CREATE TYPE ticket_status_enum AS ENUM ('FINISHED', 'PROGRESS', 'PENDENT');
 CREATE TABLE IF NOT EXISTS users (
-                                     id SERIAL PRIMARY KEY,
+                                     id INT PRIMARY KEY,
                                      name VARCHAR(45) NOT NULL,
     last_name VARCHAR(45) NOT NULL,
     cpf VARCHAR(45) UNIQUE NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS landlords (
     );
 
 CREATE TABLE IF NOT EXISTS properties (
-                                          id SERIAL PRIMARY KEY,
+                                          id INT PRIMARY KEY,
                                           created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                           updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                           active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -59,7 +59,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS unique_condo_address
 
 
 CREATE TABLE IF NOT EXISTS advertisements (
-                                              id SERIAL PRIMARY KEY,
+                                              id INT PRIMARY KEY,
                                               created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                               updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                               active BOOLEAN DEFAULT TRUE,
@@ -98,12 +98,13 @@ CREATE TABLE IF NOT EXISTS tenants (
 
 
 CREATE TABLE IF NOT EXISTS tickets (
-                                       id SERIAL PRIMARY KEY,
+                                       id INT PRIMARY KEY,
                                        urgent BOOLEAN NOT NULL,
                                        description VARCHAR(255) NOT NULL,
     status ticket_status_enum NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    active BOOLEAN DEFAULT TRUE,
     property_id INT NOT NULL,
     tenant_id INT NOT NULL,
     CONSTRAINT fk_ticket_property1
@@ -119,9 +120,10 @@ CREATE TABLE IF NOT EXISTS tickets (
     );
 
 CREATE TABLE IF NOT EXISTS maintenances (
-                                            id SERIAL PRIMARY KEY,
+                                            id INT PRIMARY KEY,
                                             created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                             updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                                            active BOOLEAN DEFAULT TRUE,
                                             finished_at TIMESTAMP WITHOUT TIME ZONE,
                                             total_value NUMERIC(10, 2),
     ticket_id INT NOT NULL,
@@ -133,7 +135,7 @@ CREATE TABLE IF NOT EXISTS maintenances (
     );
 
 CREATE TABLE IF NOT EXISTS contracts (
-                                         id SERIAL PRIMARY KEY,
+                                         id INT PRIMARY KEY,
                                          created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                          updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                          payment_day INT,
@@ -155,9 +157,10 @@ CREATE TABLE IF NOT EXISTS contracts (
     );
 
 CREATE TABLE IF NOT EXISTS payments (
-                                        id SERIAL PRIMARY KEY,
+                                        id INT PRIMARY KEY,
                                         created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                         updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                                        active BOOLEAN DEFAULT TRUE,
                                         value NUMERIC(10, 2),
     tax NUMERIC(10, 2),
     contract_id INT NOT NULL,

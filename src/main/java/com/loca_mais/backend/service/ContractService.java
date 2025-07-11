@@ -5,7 +5,7 @@ import com.loca_mais.backend.dao.PropertyDAO;
 import com.loca_mais.backend.dao.UserDAO;
 import com.loca_mais.backend.dto.create.CreateContractDTO;
 import com.loca_mais.backend.dto.response.CreateContractResponseDTO;
-import com.loca_mais.backend.dto.response.GetContractResponseDTO;
+import com.loca_mais.backend.dto.response.ContractResponseDTO;
 import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
 import com.loca_mais.backend.mappers.ContractMapper;
 import com.loca_mais.backend.model.ContractEntity;
@@ -57,7 +57,7 @@ public class ContractService {
         return contractMapper.toCreateContractResponseDTO(createdContract);
     }
 
-    public GetContractResponseDTO findById(int id) {
+    public ContractResponseDTO findById(int id) {
         return contractDAO.findWithPropertyById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Contrato não encontrado", HttpStatus.NOT_FOUND));
      }
