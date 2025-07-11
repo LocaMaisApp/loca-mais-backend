@@ -48,8 +48,8 @@ public class AdvertisementImagesService {
         return savedImages;
     }
 
-    public List<String> getImagesByAdvertisementId(Integer advertisementId) {
-        return advertisementImagesDAO.findByAdvertisementId(advertisementId).stream().map(AdvertisementImagesEntity::getUrl).toList();
+    public void deleteByUrlAndAdvertisementId(String url, Integer advertisementId)  {
+        advertisementImagesDAO.deleteByUrlAndId(url,advertisementId);
     }
 
     public void delete(Integer advertisementId) {

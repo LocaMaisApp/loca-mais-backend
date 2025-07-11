@@ -41,7 +41,7 @@ public class AdvertisementImagesDAO {
     }
 
     public Optional<AdvertisementImagesEntity> findById(int id) {
-        String sql = "SELECT id, url, advertisement_id, created_at, updated_at, active FROM advertisement_images WHERE id = ?";
+        String sql = "SELECT id, url, advertisement_id, created_at, updated_at, active FROM advertisement_images WHERE advertisement_id = ?";
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement stmt = connection.prepareStatement(sql)
@@ -58,41 +58,9 @@ public class AdvertisementImagesDAO {
         }
     }
 
-    public List<AdvertisementImagesEntity> findByAdvertisementId(int advertisementId) {
-        String sql = "SELECT id, url, advertisement_id, created_at, updated_at, active FROM advertisement_images WHERE advertisement_id = ?";
-        List<AdvertisementImagesEntity> images = new ArrayList<>();
-        try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement stmt = connection.prepareStatement(sql)
-        ) {
-            stmt.setInt(1, advertisementId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    images.add(mapResultSetToAdvertisementImage(rs));
-                }
-            }
-            return images;
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar imagens por advertisement_id", e);
-        }
-    }
-
-    public int update(AdvertisementImagesEntity advertisementImage) {
-        String sql = "UPDATE advertisement_images SET url = ?, advertisement_id = ?, updated_at = NOW(), active = ? WHERE id = ?";
-        try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement stmt = connection.prepareStatement(sql)
-        ) {
-            stmt.setString(1, advertisementImage.getUrl());
-            stmt.setInt(2, advertisementImage.getAdvertisementId());
-            return stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar imagem do anúncio: " + e.getMessage(), e);
-        }
-    }
 
     public int delete(int id) {
-        String sql = "DELETE FROM advertisement_images WHERE id = ?";
+        String sql = "DELETE FROM advertisement_images WHERE advertisement_id = ?";
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement stmt = connection.prepareStatement(sql)
@@ -103,6 +71,22 @@ public class AdvertisementImagesDAO {
             throw new RuntimeException("Erro ao deletar imagem do anúncio: " + e.getMessage(), e);
         }
     }
+
+    public int deleteByUrlAndId(String url,int id) {
+        String sql = "DELETE FROM advertisement_images WHERE advertisement_id = ? AND url = ?";
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setInt(1, id);
+            stmt.setString(2, url);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao deletar imagem do anúncio: " + e.getMessage(), e);
+        }
+    }
+
+
 
     private AdvertisementImagesEntity mapResultSetToAdvertisementImage(ResultSet rs) throws SQLException {
         AdvertisementImagesEntity advertisementImage = new AdvertisementImagesEntity();

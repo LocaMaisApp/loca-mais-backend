@@ -49,12 +49,22 @@ public class AdvertisementService {
         return advertisementDAO.findAllByQuery(query);
     }
 
-
+    public void update(AdvertisementCreateDTO createDTO,Integer id,MultipartFile[] advertisementImage) throws IOException {
+        AdvertisementEntity advertisement = advertisementMapper.toEntity(createDTO);
+        if(advertisementImage!=null && advertisementImage.length >0 ){
+        advertisementImagesService.save(advertisementImage, id);
+        }
+        advertisementDAO.updateAdvertisementPartial(advertisement,id);
+    }
 
     public void delete(Integer advertisementId){
         advertisementImagesService.delete(advertisementId);
         advertisementDAO.delete(advertisementId);
 
+    }
+
+    public void deleteImages(Integer id,String imageUrl){
+        advertisementImagesService.deleteByUrlAndAdvertisementId(imageUrl,id);
     }
 
 

@@ -51,6 +51,38 @@ public class AdvertisementController {
         return  ResponseEntity.status(HttpStatus.OK).body(advertisementResponses);
     }
 
+    @PatchMapping(value = "/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> update(
+            @RequestParam("description") String description,
+            @RequestParam("condominiumValue") Double condominiumValue,
+            @RequestParam("iptuValue") Double iptuValue,
+            @RequestParam("value") Double value,
+            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @PathVariable("id") Integer id
+    ) throws IOException{
+        AdvertisementCreateDTO advertisementCreateDTO=new AdvertisementCreateDTO(
+                description,
+                condominiumValue,
+                value,
+                iptuValue,
+                null
+        );
+        advertisementService.update(advertisementCreateDTO,id,images);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Integer id){
+        advertisementService.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/{id}/images")
+    public ResponseEntity<Void> deleteAdvertisementImages(@PathVariable("id") Integer id, @RequestParam("imageUrl") String imageUrl){
+        advertisementService.deleteImages(id,imageUrl);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 
 
 

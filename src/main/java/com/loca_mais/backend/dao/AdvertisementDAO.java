@@ -109,30 +109,30 @@ public class AdvertisementDAO {
     }
 
     public List<AdvertisementResponse> findAll() {
-        String sql = "SELECT " +
-                "a.id AS ad_id, a.description AS ad_description, a.condominium_value AS ad_condominium_value, " +
-                "a.value AS ad_value, a.iptu_value AS ad_iptu_value, a.property_id AS ad_property_id, " +
-                "a.created_at AS ad_created_at, a.updated_at AS ad_updated_at, a.active AS ad_active, " +
-                "p.id AS prop_id, p.name AS prop_name, p.street AS prop_street, p.city AS prop_city, " +
-                "p.state AS prop_state, p.complement AS prop_complement, p.number AS prop_number, " +
-                "p.size AS prop_size, p.bathroom_quantity AS prop_bathroom_quantity, p.suites AS prop_suites, " +
-                "p.car_space AS prop_car_space, p.room_quantity AS prop_room_quantity, p.landlord_id AS prop_landlord_id, " +
-                "p.created_at AS prop_created_at, p.updated_at AS prop_updated_at, p.active AS prop_active, " +
-                "ai.url AS img_url, ai.advertisement_id AS img_advertisement_id " +
-                "FROM advertisements a " +
-                "JOIN properties p ON a.property_id = p.id " +
-                "LEFT JOIN advertisement_images ai ON a.id = ai.advertisement_id " +
-                "ORDER BY a.id, ai.url"; // Garante que as imagens do mesmo anúncio venham agrupadas
+                    String sql = "SELECT " +
+                            "a.id AS ad_id, a.description AS ad_description, a.condominium_value AS ad_condominium_value, " +
+                            "a.value AS ad_value, a.iptu_value AS ad_iptu_value, a.property_id AS ad_property_id, " +
+                            "a.created_at AS ad_created_at, a.updated_at AS ad_updated_at, a.active AS ad_active, " +
+                            "p.id AS prop_id, p.name AS prop_name, p.street AS prop_street, p.city AS prop_city, " +
+                            "p.state AS prop_state, p.complement AS prop_complement, p.number AS prop_number, " +
+                            "p.size AS prop_size, p.bathroom_quantity AS prop_bathroom_quantity, p.suites AS prop_suites, " +
+                            "p.car_space AS prop_car_space, p.room_quantity AS prop_room_quantity, p.landlord_id AS prop_landlord_id, " +
+                            "p.created_at AS prop_created_at, p.updated_at AS prop_updated_at, p.active AS prop_active, " +
+                            "ai.url AS img_url, ai.advertisement_id AS img_advertisement_id " +
+                            "FROM advertisements a " +
+                            "JOIN properties p ON a.property_id = p.id " +
+                            "LEFT JOIN advertisement_images ai ON a.id = ai.advertisement_id " +
+                            "ORDER BY a.id, ai.url"; // Garante que as imagens do mesmo anúncio venham agrupadas
 
-        Map<Integer, AdvertisementResponse> advertisementResponseMap = new HashMap<>();
+                    Map<Integer, AdvertisementResponse> advertisementResponseMap = new HashMap<>();
 
-        try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement stmt = connection.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()
-        ) {
-            while (rs.next()) {
-                int adId = rs.getInt("ad_id");
+                    try (
+                            Connection connection = dataSource.getConnection();
+                            PreparedStatement stmt = connection.prepareStatement(sql);
+                            ResultSet rs = stmt.executeQuery()
+                    ) {
+                        while (rs.next()) {
+                            int adId = rs.getInt("ad_id");
                 AdvertisementResponse advertisementResponse = advertisementResponseMap.get(adId);
 
                 if (advertisementResponse == null) {
@@ -164,6 +164,67 @@ public class AdvertisementDAO {
             throw new RuntimeException("Erro ao buscar todos os anúncios com propriedades e imagens", e);
         }
     }
+
+    public List<AdvertisementResponse> findAllByLandlordId(Integer landlordId) {
+        String sql = "SELECT " +
+                "a.id AS ad_id, a.description AS ad_description, a.condominium_value AS ad_condominium_value, " +
+                "a.value AS ad_value, a.iptu_value AS ad_iptu_value, a.property_id AS ad_property_id, " +
+                "a.created_at AS ad_created_at, a.updated_at AS ad_updated_at, a.active AS ad_active, " +
+                "p.id AS prop_id, p.name AS prop_name, p.street AS prop_street, p.city AS prop_city, " +
+                "p.state AS prop_state, p.complement AS prop_complement, p.number AS prop_number, " +
+                "p.size AS prop_size, p.bathroom_quantity AS prop_bathroom_quantity, p.suites AS prop_suites, " +
+                "p.car_space AS prop_car_space, p.room_quantity AS prop_room_quantity, p.landlord_id AS prop_landlord_id, " +
+                "p.created_at AS prop_created_at, p.updated_at AS prop_updated_at, p.active AS prop_active, " +
+                "ai.url AS img_url, ai.advertisement_id AS img_advertisement_id " +
+                "FROM advertisements a " +
+                "JOIN properties p ON a.property_id = p.id " +
+                "LEFT JOIN advertisement_images ai ON a.id = ai.advertisement_id " +
+                "WHERE p.landlord_id = ? " + // <-- Filtro adicionado
+                "ORDER BY a.id, ai.url";
+
+        Map<Integer, AdvertisementResponse> advertisementResponseMap = new HashMap<>();
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
+            stmt.setInt(1, landlordId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int adId = rs.getInt("ad_id");
+                    AdvertisementResponse advertisementResponse = advertisementResponseMap.get(adId);
+
+                    if (advertisementResponse == null) {
+                        AdvertisementEntity tempAdvertisement = mapResultSetToAdvertisement(rs);
+                        PropertyEntity property = mapResultSetToProperty(rs);
+                        List<String> imageUrls = new ArrayList<>();
+
+                        advertisementResponse = new AdvertisementResponse(
+                                tempAdvertisement.getId(),
+                                tempAdvertisement.getDescription(),
+                                tempAdvertisement.getCondominiumValue(),
+                                tempAdvertisement.getValue(),
+                                tempAdvertisement.getIptuValue(),
+                                property,
+                                imageUrls
+                        );
+                        advertisementResponseMap.put(adId, advertisementResponse);
+                    }
+
+                    String imageUrl = rs.getString("img_url");
+                    if (imageUrl != null && !advertisementResponse.getImages().contains(imageUrl)) {
+                        advertisementResponse.getImages().add(imageUrl);
+                    }
+                }
+            }
+
+            return new ArrayList<>(advertisementResponseMap.values());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar todos os anúncios com propriedades e imagens", e);
+        }
+    }
+
 
 
 
@@ -253,22 +314,43 @@ public class AdvertisementDAO {
 
 
 
-    public int update(AdvertisementEntity advertisement) {
-        String sql = "UPDATE advertisements SET description = ?, condominium_value = ?, value = ?, iptu_value = ?, property_id = ?, updated_at = NOW(), active = ? WHERE id = ?";
+    public void updateAdvertisementPartial(AdvertisementEntity ad,Integer id) {
+        StringBuilder sql = new StringBuilder("UPDATE advertisements SET ");
+        List<Object> params = new ArrayList<>();
+
+        if (ad.getDescription() != null) {
+            sql.append("description = ?, ");
+            params.add(ad.getDescription());
+        }
+        if (ad.getCondominiumValue() != null) {
+            sql.append("condominium_value = ?, ");
+            params.add(ad.getCondominiumValue());
+        }
+        if (ad.getValue() != null) {
+            sql.append("value = ?, ");
+            params.add(ad.getValue());
+        }
+        if (ad.getIptuValue() != null) {
+            sql.append("iptu_value = ?, ");
+            params.add(ad.getIptuValue());
+        }
+
+        sql.append("updated_at = CURRENT_TIMESTAMP ");
+
+        sql.append("WHERE id = ?");
+        params.add(id);
+
         try (
                 Connection connection = dataSource.getConnection();
-                PreparedStatement stmt = connection.prepareStatement(sql)
+                PreparedStatement stmt = connection.prepareStatement(sql.toString())
         ) {
-            stmt.setString(1, advertisement.getDescription());
-            stmt.setDouble(2, advertisement.getCondominiumValue());
-            stmt.setDouble(3, advertisement.getValue());
-            stmt.setDouble(4, advertisement.getIptuValue());
-            stmt.setInt(5, advertisement.getPropertyId());
-            stmt.setBoolean(6, advertisement.isActive());
-            stmt.setInt(7, advertisement.getId());
-            return stmt.executeUpdate();
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            int rowsAffected = stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar anúncio: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao atualizar o anúncio", e);
         }
     }
 

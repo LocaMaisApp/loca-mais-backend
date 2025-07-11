@@ -1,9 +1,11 @@
 package com.loca_mais.backend.service;
 
+import com.loca_mais.backend.dao.AdvertisementDAO;
 import com.loca_mais.backend.dao.LandlordDAO;
 import com.loca_mais.backend.dao.PropertyDAO;
 import com.loca_mais.backend.dao.UserDAO;
 import com.loca_mais.backend.dto.create.AuthRegisterDTO;
+import com.loca_mais.backend.dto.response.AdvertisementResponse;
 import com.loca_mais.backend.dto.response.UserResponseDTO;
 import com.loca_mais.backend.enums.UserType;
 import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
@@ -23,6 +25,7 @@ public class LandlordService {
     private final LandlordDAO landlordDAO;
     private final UserDAO userDAO;
     private final PropertyDAO  propertyDAO;
+    private final AdvertisementDAO advertisementDAO;
 
     public void createLandlord(AuthRegisterDTO user,String encodedPassword) {
         UserEntity userEntity = new UserEntity(
@@ -53,6 +56,10 @@ public class LandlordService {
     public List<PropertyEntity> findAllLandlordProperties(Integer landlordId) {
         return propertyDAO.findAllByLandlordId(landlordId);
 
+    }
+
+    public List<AdvertisementResponse> findAllLandlordAdvertisements(Integer landlordId){
+        return advertisementDAO.findAllByLandlordId(landlordId);
     }
 
 
