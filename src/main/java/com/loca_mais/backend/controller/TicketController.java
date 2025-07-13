@@ -42,8 +42,8 @@ public class TicketController {
         }
     }
 
-    @GetMapping("/my-tickets")
-    public ResponseEntity<Object> getTenantTickets(int tenantId) {
+    @GetMapping("/my-tickets/{tenantId}")
+    public ResponseEntity<Object> getTenantTickets(@PathVariable int tenantId) {
         try {
             List<TicketEntity> tickets = ticketService.getTicketsByTenant(tenantId);
             return ResponseEntity.ok().body(ticketMapper.entityListToResponseDtoList(tickets));
@@ -52,8 +52,8 @@ public class TicketController {
         }
     }
 
-    @GetMapping("/property/{propertyId}")
-    public ResponseEntity<Object> getPropertyTickets(@PathVariable int propertyId, @RequestBody int landlordId) {
+    @GetMapping("/property/{propertyId}/{landlordId}")
+    public ResponseEntity<Object> getPropertyTickets(@PathVariable int propertyId, @PathVariable int landlordId) {
         try {
             List<TicketEntity> tickets = ticketService.getTicketsByProperty(propertyId, landlordId);
             return ResponseEntity.ok().body(ticketMapper.entityListToResponseDtoList(tickets));
