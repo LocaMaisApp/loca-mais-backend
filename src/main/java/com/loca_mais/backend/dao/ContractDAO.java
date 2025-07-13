@@ -205,18 +205,33 @@ public class ContractDAO {
                 "WHERE c.id = ? AND c.active = TRUE " +
                 "ORDER BY pay.created_at";
 
+        ContractResponseDTO contractResponse = null;
+        List<PaymentResponseDTO> payments = new ArrayList<>();
+
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setInt(1, id);
 
             try (ResultSet rs = statement.executeQuery()) {
-                List<PaymentResponseDTO> payments = new ArrayList<>();
-                Integer contractId = null;
                 while (rs.next()) {
-                    if (contractId == null) {
-                        contractId = rs.getInt("contract_id");
-                        Timestamp updatedTs = rs.getTimestamp("contract_updated_at");
+                    if (contractResponse == null) {
+                        PropertyEntity property = mapRowToPropertyEntity(rs);
+                        Timestamp updatedAtTimestamp = rs.getTimestamp("contract_updated_at");
+
+                        contractResponse = new ContractResponseDTO(
+                                rs.getInt("contract_id"),
+                                rs.getTimestamp("contract_created_at").toLocalDateTime(),
+                                updatedAtTimestamp != null ? updatedAtTimestamp.toLocalDateTime() : null,
+                                rs.getInt("payment_day"),
+                                rs.getBigDecimal("monthly_value"),
+                                rs.getInt("duration"),
+                                rs.getBigDecimal("deposit"),
+                                rs.getInt("tenant_id"),
+                                rs.getBoolean("contract_active"),
+                                property,
+                                payments
+                        );
                     }
 
                     int paymentId = rs.getInt("payment_id");
@@ -229,17 +244,12 @@ public class ContractDAO {
                         ));
                     }
                 }
-
-                if (contractId != null) {
-                    return Optional.of(mapRowToGetContractResponseDTO(rs, payments));
-                }
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar o contrato com a propriedade e pagamentos", e);
         }
 
-        return Optional.empty();
+        return Optional.ofNullable(contractResponse);
     }
 
     public Optional<ContractEntity> findById(int id) {
@@ -308,24 +318,5 @@ public class ContractDAO {
         property.setRoomQuantity(rs.getInt("room_quantity"));
         property.setLandlord_id(rs.getInt("landlord_id"));
         return property;
-    }
-
-    private ContractResponseDTO mapRowToGetContractResponseDTO(ResultSet rs, List<PaymentResponseDTO> payments) throws SQLException {
-        PropertyEntity property = mapRowToPropertyEntity(rs);
-        Timestamp updatedAtTimestamp = rs.getTimestamp("contract_updated_at");
-
-        return new ContractResponseDTO(
-                rs.getInt("contract_id"),
-                rs.getTimestamp("contract_created_at").toLocalDateTime(),
-                updatedAtTimestamp != null ? updatedAtTimestamp.toLocalDateTime() : null,
-                rs.getInt("payment_day"),
-                rs.getBigDecimal("monthly_value"),
-                rs.getInt("duration"),
-                rs.getBigDecimal("deposit"),
-                rs.getInt("tenant_id"),
-                rs.getBoolean("contract_active"),
-                property,
-                payments
-        );
     }
 }
