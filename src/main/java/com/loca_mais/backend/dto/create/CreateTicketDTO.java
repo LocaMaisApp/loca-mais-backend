@@ -11,6 +11,9 @@ public record CreateTicketDTO(
         String description,
 
         @NotNull
-        int property_id
+        int property_id,
+
+        @NotBlank
+        String tenantEmail
 ) {
 }
