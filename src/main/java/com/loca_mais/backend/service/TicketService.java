@@ -46,6 +46,7 @@ public class TicketService {
         ticket.setUpdatedAt(now);
         ticket.setTenant_id(tenant.getId());
         ticket.setStatus(TickerStatus.PENDENT);
+        ticket.setActive(true);
 
         return ticketDAO.save(ticket);
     }
