@@ -9,8 +9,8 @@ public record TicketResponseDTO(
         boolean urgent,
         String description,
         TickerStatus status,
-        Date created_at,
-        Date updated_at,
+        Date createdAt,
+        Date updatedAt,
         int property_id,
         int tenant_id
 ) {
