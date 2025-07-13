@@ -51,14 +51,14 @@ public class TicketService {
         return ticketDAO.save(ticket);
     }
 
-    public void updateTicketStatusByLandlord(int ticketId, TicketUpdtateStatusDTO dto, String email) throws SQLException, AccessDeniedException {
+    public void updateTicketStatusByLandlord(int ticketId, TicketUpdtateStatusDTO dto) throws SQLException, AccessDeniedException {
         TicketEntity ticket = ticketDAO.findById(ticketId)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket não encontrado."));
 
         PropertyEntity property = propertyDAO.findById(ticket.getProperty_id())
                 .orElseThrow(() -> new EntityNotFoundException("Propriedade não encontrada."));
 
-        Optional<UserEntity> landlordEntity = userDAO.findByEmail(email);
+        Optional<UserEntity> landlordEntity = userDAO.findByEmail(dto.email());
         UserEntity landlord = landlordEntity.get();
 
         if(property.getLandlord_id() != landlord.getId()) {

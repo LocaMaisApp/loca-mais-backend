@@ -33,9 +33,9 @@ public class TicketController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Object> updateTicketStatus(@PathVariable int id, @Valid @RequestBody TicketUpdtateStatusDTO updtateStatusDTO, String email) {
+    public ResponseEntity<Object> updateTicketStatus(@PathVariable int id, @Valid @RequestBody TicketUpdtateStatusDTO updtateStatusDTO) {
         try {
-            ticketService.updateTicketStatusByLandlord(id, updtateStatusDTO, email);
+            ticketService.updateTicketStatusByLandlord(id, updtateStatusDTO);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException | AccessDeniedException | SQLException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

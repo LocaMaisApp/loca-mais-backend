@@ -89,7 +89,7 @@ public class TicketDAO {
     }
 
     public void updateStatus(int id, TickerStatus status) throws SQLException {
-        String sql = "UPDATE locamais.tickets SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        String sql = "UPDATE locamais.tickets SET status = ?::ticket_status_enum, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, status.name());
