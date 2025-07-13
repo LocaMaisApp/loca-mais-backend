@@ -40,8 +40,13 @@ public class TicketService {
         UserEntity tenant = tenantEntity.get();
 
         TicketEntity ticket = ticketMapper.creationDtoToEntity(dto);
+
+        Date now = new Date();
+        ticket.setCreatedAt(now);
+        ticket.setUpdatedAt(now);
         ticket.setTenant_id(tenant.getId());
         ticket.setStatus(TickerStatus.PENDENT);
+        ticket.setActive(true);
 
         return ticketDAO.save(ticket);
     }

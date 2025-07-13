@@ -18,7 +18,7 @@ public class TicketDAO {
     private DataSource dataSource;
 
     public TicketEntity save(TicketEntity ticket) throws SQLException {
-        String sql = "INSERT INTO locamais.tickets (urgent, description, status, property_id, tenant_id, created_at, updated_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO locamais.tickets (urgent, description, status, property_id, tenant_id, created_at, updated_at, active) VALUES (?, ?, ?::ticket_status_enum, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
