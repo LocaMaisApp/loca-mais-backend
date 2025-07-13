@@ -18,6 +18,6 @@ public class MaintenanceService {
 
     public MaintenanceEntity createMaintenance(CreateMaintenanceDTO dto) throws SQLException {
         MaintenanceEntity maintenanceEntity = maintenanceMapper.creationDtoToEntity(dto);
-        return maintenanceDAO.save(maintenanceEntity);
+        return maintenanceDAO.create(maintenanceEntity);
     }
 }

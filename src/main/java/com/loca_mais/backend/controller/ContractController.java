@@ -3,12 +3,15 @@ package com.loca_mais.backend.controller;
 import com.loca_mais.backend.dto.create.CreateContractDTO;
 import com.loca_mais.backend.dto.response.CreateContractResponseDTO;
 import com.loca_mais.backend.dto.response.ContractResponseDTO;
+import com.loca_mais.backend.dto.response.MaintenanceResponseDTO;
 import com.loca_mais.backend.exceptions.custom.core.EntityNotFoundException;
 import com.loca_mais.backend.service.ContractService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/contract")
@@ -38,6 +41,14 @@ public class ContractController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("{id}/maintenances")
+    public ResponseEntity<List<MaintenanceResponseDTO>> findContractMaintenancesByUserId(@PathVariable int id) {
+        List<MaintenanceResponseDTO> list=contractService.findAllMaintenancesByUserId(id);
+        return ResponseEntity.ok().body(list);
+    }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteById(@PathVariable int id) {
