@@ -2,6 +2,7 @@ package com.loca_mais.backend.controller;
 
 import com.loca_mais.backend.dto.create.CreateTicketDTO;
 import com.loca_mais.backend.dto.requests.TicketUpdtateStatusDTO;
+import com.loca_mais.backend.dto.response.TicketResponseDTO;
 import com.loca_mais.backend.mappers.TicketMapper;
 import com.loca_mais.backend.model.TicketEntity;
 import com.loca_mais.backend.service.TicketService;
@@ -26,7 +27,7 @@ public class TicketController {
     public ResponseEntity<Object> create(@Valid @RequestBody CreateTicketDTO createTicketDTO) {
         try {
             TicketEntity newTicket = ticketService.createTicketByTenant(createTicketDTO);
-            return ResponseEntity.ok().body(newTicket);
+            return ResponseEntity.ok().body(ticketMapper.entityToResponseDto(newTicket));
         } catch (SQLException | RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

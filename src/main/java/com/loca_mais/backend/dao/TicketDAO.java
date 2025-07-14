@@ -18,7 +18,7 @@ public class TicketDAO {
     private DataSource dataSource;
 
     public TicketEntity save(TicketEntity ticket) throws SQLException {
-        String sql = "INSERT INTO locamais.tickets (urgent, description, status, property_id, tenant_id, created_at, updated_at, active) VALUES (?, ?, ?::ticket_status_enum, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO locamais.tickets (urgent, description, status, property_id, tenant_id, created_at, updated_at) VALUES (?, ?, ?::ticket_status_enum, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -29,7 +29,6 @@ public class TicketDAO {
             statement.setInt(5, ticket.getTenant_id());
             statement.setTimestamp(6, new Timestamp(ticket.getCreatedAt().getTime()));
             statement.setTimestamp(7, new Timestamp(ticket.getUpdatedAt().getTime()));
-            statement.setBoolean(8, ticket.isActive());
 
             statement.executeUpdate();
 
@@ -106,7 +105,6 @@ public class TicketDAO {
                 .status(TickerStatus.valueOf(rs.getString("status")))
                 .createdAt(rs.getTimestamp("created_at"))
                 .updatedAt(rs.getTimestamp("updated_at"))
-                .active(rs.getBoolean("active"))
                 .property_id(rs.getInt("property_id"))
                 .tenant_id(rs.getInt("tenant_id"))
                 .build();
