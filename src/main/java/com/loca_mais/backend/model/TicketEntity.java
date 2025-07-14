@@ -3,17 +3,20 @@ package com.loca_mais.backend.model;
 import com.loca_mais.backend.core.AbstractModel;
 import com.loca_mais.backend.enums.TickerStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+
+import java.util.Date;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
-@EqualsAndHashCode(callSuper = true)
-public class TicketEntity extends AbstractModel {
+public class TicketEntity {
+    public int id;
+    private Date createdAt=new Date();
+    private Date updatedAt=new Date();
     private boolean urgent;
     private String description;
     private TickerStatus status;

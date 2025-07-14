@@ -12,6 +12,7 @@ public record TicketResponseDTO(
         Date createdAt,
         Date updatedAt,
         int property_id,
-        int tenant_id
+        int tenant_id,
+        boolean active
 ) {
 }
